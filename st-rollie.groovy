@@ -76,17 +76,17 @@ def parse(String description) {
 
 def poll() {
     log.debug "Executing 'poll'"
-    sendEvent(name: 'level', value: "10", unit: "inches")
-    sendEvent(name: 'percent', value: "30", unit: "%")
+    //sendEvent(name: 'level', value: "10", unit: "inches")
+    //sendEvent(name: 'percent', value: "30", unit: "%")
  
 	rollieLogin()
 
 	def params = [
 		uri: "http://rollieapp.com",
-        path: "/gauges/AllControllers.php",
-        headers: [
-          "Cookie": data.cookies
-        ]
+        	path: "/gauges/AllControllers.php",
+        	headers: [
+	          "Cookie": data.cookies
+        	]
 	]
 
     try {
