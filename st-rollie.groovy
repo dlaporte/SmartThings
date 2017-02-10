@@ -31,7 +31,7 @@ preferences {
 	input(name: "tanktype", type: "enum", options: ["0": "275 Vertical", "1": "275 Horizontal", "2": "330 Vertical", "3": "330 Horizonal", "4": "Roth 1000L", "5": "Roth 1500L", "6": "Roth 400L", "7": "Vertical Cylinder", "8": "Horizontal Cylinder", "9": "Square Tank"], defaultValue: "0", title: "Tank Type", displayDuringSetup: true)
 
 	input(title: "", description: "Vertical Cylinder Measurements (optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/ST-Rollie/master/vertical.png", element: "paragraph")
-    input(name: "v_height", type: "number", title: "Height", required: false)
+    	input(name: "v_height", type: "number", title: "Height", required: false)
 	input(name: "v_diameter", type: "number", title: "Diameter", required: false)
 
 	input(title: "", description: "Horizontal Cylinder Measurements (optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/ST-Rollie/master/horizontal.png", element: "paragraph")
@@ -40,7 +40,7 @@ preferences {
 
 	input(title: "", description: "Square Tank Measurements (optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/ST-Rollie/master/square.png", element: "paragraph")
 	input(name: "s_length", type: "number", title: "Length", required: false)
-    input(name: "s_width", type: "number", title: "Width", required: false)
+	input(name: "s_width", type: "number", title: "Width", required: false)
 	input(name: "s_height", type: "number", title: "Height", required: false)
 
 
@@ -130,10 +130,10 @@ def poll() {
 
 	def params = [
 		uri: "http://rollieapp.com",
-        path: "/gauges/AllControllers.php",
-        headers: [
-          "Cookie": data.cookies
-        ]
+        	path: "/gauges/AllControllers.php",
+        	headers: [
+			"Cookie": data.cookies
+		]
 	]
 
     try {
@@ -231,17 +231,19 @@ def configure() {
     	settings.s_height = "n"
 	}
     
-    def params = [
-	    uri: "http://rollieapp.com",
-        path: "/gauges/updateclient.php",
-        query: ["userdata[]": ["${settings.password}", "${settings.threshold}",
-        					   "${settings.v_height}", "${settings.v_diameter}",
-                               "${settings.h_diameter}", "${settings.h_length}",
-                               "${settings.s_height}", "${settings.s_length}", "${settings.s_width}",
-                               "${settings.tanktype}", "1", "${settings.email}", "${settings.sms}", "11"]],
-        headers: [
-          "Cookie": data.cookies
-        ]
+    	def params = [
+		uri: "http://rollieapp.com",
+		path: "/gauges/updateclient.php",
+		query: ["userdata[]": [
+			"${settings.password}", "${settings.threshold}",
+			"${settings.v_height}", "${settings.v_diameter}",
+			"${settings.h_diameter}", "${settings.h_length}",
+			"${settings.s_height}", "${settings.s_length}", "${settings.s_width}",
+			"${settings.tanktype}", "1", "${settings.email}", "${settings.sms}", "11"]
+		],
+		headers: [
+			"Cookie": data.cookies
+		]
 	]
 	try {
         httpGet(params) { response ->
