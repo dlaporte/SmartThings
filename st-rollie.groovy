@@ -139,12 +139,14 @@ def poll() {
     try {
         httpGet(params) { response ->
             log.debug "Request was successful, ${response.status}"
-            def match
-            def regex = /(?s)<div class='container'>(.+?)<\/div>/
-            if ((match = response.data =~ regex)) {
-                log.debug "hello world"
-        
-                def div = match[0][1]
+            
+            String doc = response.data.text()
+            def m
+            if ((m = doc =~ /(?ms)<div class=\'container\'>(.+?)<\/div>/)) {
+            //if ((m = doc =~ /(?ms)square(.+?)input/)) {        
+                String div = m[0][1]
+                log.debug "hello world: ${div}"
+                
                 def xmlParser = new XmlSlurper()
                 def html = xmlParser.parseText(div)
 
