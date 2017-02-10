@@ -1,7 +1,7 @@
 /**
  *  Rollie Oil Gauge
  *
- *  Version - 0.1
+ *  Version - 0.2
  *
  *  Copyright 2017 David LaPorte
  *
@@ -13,11 +13,21 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
+ *
  *  Instructions:
- *   - stuff
+ *
+ *	1) For US, visit: https://graph.api.smartthings.com
+ *	2) For UK, visit: https://graph-eu01-euwest1.api.smartthings.com
+ *	3) Click "My Device Handlers"
+ *	4) Click "New Device Handler" in the top right
+ *	5) Click the "From Code" tab
+ *	6) Paste in the code from: https://github.com/dlaporte/ST-Rollie/blob/master/st-rollie.groovy
+ *	7) Click "Create"
+ *	8) Click "Publish -> For Me"
+ *
  */
 
-
+include 'asynchttp_v1'
 
 preferences {
 	input(title: "", description: "Account Configuration", type: "paragraph", element: "paragraph")
@@ -54,10 +64,6 @@ metadata {
         capability "Sensor"
         capability "Refresh"
 
-        //capability "Relative Humidity Measurement"
-        //capability "Temperature Measurement"
-        //capability "Illuminance Measurement"
-
         attribute "gallons", "number"
         attribute "level", "string"
     }
@@ -79,10 +85,6 @@ metadata {
 			)
   		}
 
-		valueTile("level", "device.level") {
-        	state("level", label: '${level} inches', unit: "in")
-		}
-
 		multiAttributeTile(name:"summary", type:"generic", width:6, height:4) {
 			tileAttribute("device.gallons", key: "PRIMARY_CONTROL") {
 				attributeState("gallons", label: '${currentValue} gallons',
@@ -98,33 +100,31 @@ metadata {
 			tileAttribute("device.level", key: "SECONDARY_CONTROL") {
 				attributeState("level", label: '${currentValue} inches')
     		}
-            			tileAttribute("device.serial", key: "TERTIARY_CONTROL") {
-				attributeState("serial", label: '${settings.serial} inches')
-    		}
-
 		}
   
-		standardTile("refresh", "device.poll", inactiveLabel: false, decoration: "flat", width: 3, height: 3) {
+		standardTile("refresh", "device.poll", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
 			state("default", action:"polling.poll", icon:"st.secondary.refresh")
 		}
 
-		standardTile("configure", "device.configure", inactiveLabel: false, decoration: "flat", width: 3, height: 3) {
+		standardTile("configure", "device.configure", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
 		    state "configure", label:'', action:"configuration.configure", icon:"st.secondary.configure"
 		}
 
-		main "gallons"
-  		details(["summary", "refresh", "configure"])
-	}
-}
+		valueTile("updated", "device.updated", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
+		    state "updated", label: 'Updated:\n${currentValue}'
+		}
+        
+		valueTile("level", "device.level", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
+			state "level", label: '${currentValue} inches'
+		}
 
-def parse(String description) {
-    log.debug "Parsing '${description}'"
+		main "gallons"
+  		details(["summary", "updated", "refresh", "configure"])
+	}
 }
 
 def poll() {
     log.debug "poll called"
-    sendEvent(name: 'level', value: "12", unit: "inches")
-    sendEvent(name: 'gallons', value: "147", unit: "gallons")
  
 	rollieLogin()
 
@@ -137,33 +137,38 @@ def poll() {
 	]
 
     try {
-        httpGet(params) { response ->
-            log.debug "Request was successful, ${response.status}"
-            
-            String doc = response.data.text()
-            def m
-            if ((m = doc =~ /(?ms)<div class=\'container\'>(.+?)<\/div>/)) {
-            //if ((m = doc =~ /(?ms)square(.+?)input/)) {        
-                String div = m[0][1]
-                log.debug "hello world: ${div}"
-                
-                def xmlParser = new XmlSlurper()
-                def html = xmlParser.parseText(div)
-
-                def sn = div.table.tbody.td[0].text()
-                def date = div.table.tbody.td[1].text()
-                def time = div.table.tbody.td[2].text()
-                def level = div.table.tbody.td[3].text()
-                def gallons = div.table.tbody.td[4].text()
-
-                log.debug "gallons: $gallons"
-            } else {
-            	log.debug "NO MATCH"
-            }
-		}
+		asynchttp_v1.get('parseAllControllers', params)
     } catch (e) {
         log.error "something went wrong: $e"
     }
+}
+
+def parseAllControllers(response, data) {
+	log.debug "parseAllControllers called"
+	log.debug "Request was successful, ${response.status}"    
+	def m
+	if ((m = response.getData() =~ /(?ms)<div class=\'container\'>(.+?)<\/div>/)) {
+		String div = m[0][1]
+
+		def xmlParser = new XmlSlurper()
+		def table = xmlParser.parseText(div)
+        
+		def sn = table[0].children[1].children[0].children[15].children[0].text()
+		def date = table[0].children[1].children[0].children[15].children[1].text()
+		def time = table[0].children[1].children[0].children[15].children[2].text()
+		def level = table[0].children[1].children[0].children[15].children[3].text()
+		def gallons = table[0].children[1].children[0].children[15].children[4].text()
+
+        sendEvent(name: 'level', value: "${level}", unit: "inches")
+		sendEvent(name: 'gallons', value: "${gallons}", unit: "gallons")
+		sendEvent(name: 'date', value: "${date}")
+		sendEvent(name: 'time', value: "${time}")
+        sendEvent(name: 'sn', value: "${sn}", displayed: false)
+		sendEvent(name: 'updated', value: "${date}\n${time}", displayed: false)
+        
+	} else {
+		log.debug "parseAllControllers parse error"
+	}
 }
 
 def rollieLogin() {
