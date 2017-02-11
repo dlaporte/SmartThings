@@ -21,7 +21,7 @@
  *	3) Click "My Device Handlers"
  *	4) Click "New Device Handler" in the top right
  *	5) Click the "From Code" tab
- *	6) Paste in the code from: https://github.com/dlaporte/ST-Rollie/blob/master/st-rollie.groovy
+ *	6) Paste in the code from: https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/rollie-gauge.groovy
  *	7) Click "Create"
  *	8) Click "Publish -> For Me"
  *
@@ -277,4 +277,3 @@ def configure() {
         log.error "something went wrong: $e"
     }
 }
-
