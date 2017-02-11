@@ -1,5 +1,5 @@
 /**
- *  Rollie Oil Gauge
+ *  Rollie Oil Tank Gauge
  *
  *  Version - 0.2
  *
@@ -41,7 +41,7 @@ preferences {
 	input(name: "tanktype", type: "enum", options: ["0": "275 Vertical", "1": "275 Horizontal", "2": "330 Vertical", "3": "330 Horizonal", "4": "Roth 1000L", "5": "Roth 1500L", "6": "Roth 400L", "7": "Vertical Cylinder", "8": "Horizontal Cylinder", "9": "Square Tank"], defaultValue: "0", title: "Tank Type", displayDuringSetup: true)
 
 	input(title: "", description: "Vertical Cylinder Measurements (optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/ST-Rollie/master/vertical.png", element: "paragraph")
-    	input(name: "v_height", type: "number", title: "Height", required: false)
+    input(name: "v_height", type: "number", title: "Height", required: false)
 	input(name: "v_diameter", type: "number", title: "Diameter", required: false)
 
 	input(title: "", description: "Horizontal Cylinder Measurements (optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/ST-Rollie/master/horizontal.png", element: "paragraph")
@@ -74,9 +74,9 @@ metadata {
 
 	tiles(scale: 2) {
 
-		valueTile("gallons", "device.gallons") {
+		valueTile("gallons_icon", "device.gallons") {
 			state("gallons", label: '${currentValue} gallons', unit: "gal",
-				icon: "https://raw.githubusercontent.com/dlaporte/ST-Rollie/master/oil-icon.png",
+				icon: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/oil-icon.png",
 				backgroundColors: [
 					[value: 0, color: "#bc2323"],
 					[value: 50, color: "#1e9cbb"],
@@ -88,7 +88,7 @@ metadata {
 		multiAttributeTile(name:"summary", type:"generic", width:6, height:4) {
 			tileAttribute("device.gallons", key: "PRIMARY_CONTROL") {
 				attributeState("gallons", label: '${currentValue} gallons',
-					icon: "https://raw.githubusercontent.com/dlaporte/ST-Rollie/master/oil-drop-icon-png-large.png",
+					icon: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/oil-drop-icon-png-large.png",
 					unit: "gal",
                     backgroundColors: [
 						[value: 0, color: "#bc2323"],
@@ -97,10 +97,49 @@ metadata {
 					]
 				)
 			}
+            
 			tileAttribute("device.level", key: "SECONDARY_CONTROL") {
 				attributeState("level", label: '${currentValue} inches')
     		}
 		}
+
+
+		standardTile("today", "today", width: 2, height: 2) {
+			state("default", label: "Today")
+		}
+		valueTile("gallons_today_usage", "device.gallons_today_usage", width: 2, height: 2, decoration: "flat", wordWrap: false) {
+        	state("gallons_today_usage", label: '${currentValue}')
+		}
+        
+		valueTile("level_today_usage", "device.level_today_usage", width: 2, height: 2) {
+			state("level_today_usage", label: '${currentValue}')
+		}
+        
+		standardTile("yesterday", "yesterday", width: 2, height: 2) {
+			state("default", label: "Yesterday")
+		}
+        
+		valueTile("gallons_yesterday_usage", "device.gallons_yesterday_usage", width: 2, height: 2, decoration: "flat", wordWrap: false) {
+			state("gallons_yesterday_usage", label: '${currentValue}')
+		}
+        
+		valueTile("level_yesterday_usage", "device.level_yesterday_usage", width: 2, height: 2) {
+        	state("level_yesterday_usage", label: '${currentValue}')
+		}
+        
+		standardTile("week", "week", width: 2, height: 2) {
+			state("default", label: "Last Week")
+		}
+        
+		valueTile("gallons_week_usage", "device.gallons_week_usage", width: 2, height: 2, decoration: "flat", wordWrap: false) {
+			state("gallons_week_usage", label: '${currentValue}')
+		}
+        
+		valueTile("level_week_usage", "device.level_week_usage", width: 2, height: 2) {
+			state("level_week_usage", label: '${currentValue}')
+		}
+
+		//htmlTile(name:"graph", action: "getGraph", refreshInterval: 1, width: 6, height: 4, whitelist: ["www.gstatic.com"])
   
 		standardTile("refresh", "device.poll", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
 			state("default", action:"polling.poll", icon:"st.secondary.refresh")
@@ -118,24 +157,31 @@ metadata {
 			state "level", label: '${currentValue} inches'
 		}
 
-		main "gallons"
-  		details(["summary", "updated", "refresh", "configure"])
+		main "gallons_icon"
+  		details(["summary", "today", "gallons_today_usage", "level_today_usage", "yesterday", "gallons_yesterday_usage", "level_yesterday_usage", "week", "gallons_week_usage", "level_week_usage", "updated", "refresh", "configure"])
 	}
+}
+
+mappings {
+	path("/getGraph") {action: [GET: "getGraph"]}
 }
 
 def updated() {
 	log.debug("updated with settings: ${settings.inspect()}")
 	pullAllControllers()
+    pullHistory()
 }
 
 def refresh() {
 	log.debug "refresh called"
 	pullAllControllers()
+    pullHistory()
 }
 
 def poll() {
 	log.debug "poll called"
 	pullAllControllers()
+	pullHistory()
 }
 
 def pullAllControllers() {
@@ -183,6 +229,79 @@ def parseAllControllers(response, data) {
         
 	} else {
 		log.debug "parseAllControllers parse error"
+	}
+}
+
+def pullHistory() {
+    log.debug "pullHistory called"
+ 
+	rollieLogin()
+
+	def params = [
+		uri: "http://rollieapp.com",
+		path: "/gauges/loadhistory.php",
+		query: ["sn": "${settings.serial}", "pid": "11"],
+		headers: [
+			"Cookie": data.cookies
+		]
+	]
+
+    try {
+		asynchttp_v1.get('parseHistory', params)
+    } catch (e) {
+        log.error "something went wrong: $e"
+    }
+}
+
+def parseHistory(response, data) {
+	log.debug "parseHistory called"
+	log.debug "Request was successful, ${response.status}"
+    
+    // fix missing </tbody> tag
+    String html = response.getData()
+	String html2 = html.replaceAll(/<\/tr><\/table>/, /<\/tr><\/tbody><\/table>/)
+
+	def xmlParser = new XmlSlurper()
+	def history = xmlParser.parseText(html2)
+
+
+	def level_history = []
+	def gallons_history = []
+
+    history[0].children[1].children.each {
+        if (it.children[1].text()) {
+			level_history.add(Float.parseFloat(it.children[1].text()))
+		} else {
+        	level_history.add(0)
+		}
+        if (it.children[2].text()) {
+			gallons_history.add(Float.parseFloat(it.children[2].text()))
+		} else {
+        	gallons_history.add(0)
+		}
+    }
+	if (gallons_history.size >= 2) {
+	    def gallons_today_usage = gallons_history[-2] - gallons_history[-1]
+    	def level_today_usage = level_history[-2] - level_history[-1]
+
+		sendEvent(name: 'level_today_usage', value: "${level_today_usage.round(1)}in ", unit: "inches")
+		sendEvent(name: 'gallons_today_usage', value: "${gallons_today_usage.round(1)}gal", unit: "gallons")
+	}
+
+	def gallons_yesterday_usage = gallons_history[-3] - gallons_history[-2]
+	def level_yesterday_usage = level_history[-3] - level_history[-2]
+
+	if (gallons_history.size >= 3 && gallons_yesterday_usage > 0) {
+		sendEvent(name: 'level_yesterday_usage', value: "${level_yesterday_usage.round(1)}in ", unit: "inches")
+		sendEvent(name: 'gallons_yesterday_usage', value: "${gallons_yesterday_usage.round(1)}gal", unit: "gallons")
+	}
+
+	def gallons_week_usage = gallons_history[-8] - gallons_history[-2]
+   	def level_week_usage = level_history[-8] - level_history[-2]
+
+    if (gallons_history.size >= 9 && gallons_yesterday_usage > 0) {
+		sendEvent(name: 'level_week_usage', value: "${level_week_usage.round(1)}in ", unit: "inches")
+		sendEvent(name: 'gallons_week_usage', value: "${gallons_week_usage.round(1)}gal", unit: "gallons")
 	}
 }
 
@@ -276,4 +395,87 @@ def configure() {
     } catch (e) {
         log.error "something went wrong: $e"
     }
+}
+
+def getGraph() {
+	def html = """
+		<!DOCTYPE html>
+			<html>
+				<head>
+					<meta http-equiv="cache-control" content="max-age=0"/>
+					<meta http-equiv="cache-control" content="no-cache"/>
+					<meta http-equiv="expires" content="0"/>
+					<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT"/>
+					<meta http-equiv="pragma" content="no-cache"/>
+					<meta name="viewport" content="width = device-width">
+					<meta name="viewport" content="initial-scale = 1.0, user-scalable=no">
+					<style type="text/css">body,div {margin:0;padding:0}</style>
+					<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+					<script type="text/javascript">
+						google.charts.load('current', {packages: ['corechart']});
+						google.charts.setOnLoadCallback(drawGraph);
+						function drawGraph() {
+							var data = new google.visualization.DataTable();
+							data.addColumn('timeofday', 'time');
+							data.addColumn('number', 'Gallons (Yesterday)');
+							data.addColumn('number', 'Level (Yesterday)');
+                            
+                            
+                            
+                            
+							data.addColumn('number', 'Gallons (Today)');
+							data.addColumn('number', 'Level (Today)');
+							data.addRows([
+								${getDataString(1)}
+								${getDataString(2)}
+								${getDataString(3)}
+								${getDataString(4)}
+							]);
+							var options = {
+								fontName: 'San Francisco, Roboto, Arial',
+								height: 240,
+								hAxis: {
+									format: 'H:mm',
+									minValue: [${getStartTime()},0,0],
+									slantedText: false
+								},
+								series: {
+									0: {targetAxisIndex: 1, color: '#FFC2C2', lineWidth: 1},
+									1: {targetAxisIndex: 0, color: '#D1DFFF', lineWidth: 1},
+									2: {targetAxisIndex: 1, color: '#FF0000'},
+									3: {targetAxisIndex: 0, color: '#004CFF'}
+								},
+								vAxes: {
+									0: {
+										title: 'Power (W)',
+										format: 'decimal',
+										textStyle: {color: '#004CFF'},
+										titleTextStyle: {color: '#004CFF'}
+									},
+									1: {
+										title: 'Energy (kWh)',
+										format: 'decimal',
+										textStyle: {color: '#FF0000'},
+										titleTextStyle: {color: '#FF0000'}
+									}
+								},
+								legend: {
+									position: 'none'
+								},
+								chartArea: {
+									width: '72%',
+									height: '85%'
+								}
+							};
+							var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+							chart.draw(data, options);
+						}
+					</script>
+				</head>
+				<body>
+					<div id="chart_div"></div>
+				</body>
+			</html>
+		"""
+	render contentType: "text/html", data: html, status: 200
 }
