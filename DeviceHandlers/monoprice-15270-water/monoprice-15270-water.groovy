@@ -1,5 +1,5 @@
 /**
-* WADWAZ-1/Monoprice 15270 as Water Sensor
+* WADWAZ-1/Monoprice as Water Sensor
 *
 * Author: SmartThings
 * Date: 2016-05-22
@@ -8,7 +8,7 @@
 // for the UI
 metadata {
 
-	definition (name: "WADWAZ-1/Monoprice 15270 as Water Sensor", namespace: "dlaporte", author: "dlaporte") {
+	definition (name: "WADWAZ-1/Monoprice as Water Sensor", namespace: "dlaporte", author: "dlaporte") {
 		capability "Water Sensor"
 		capability "Sensor"
 		capability "Battery"
@@ -21,18 +21,23 @@ metadata {
 		status "wet": "command: 2001, payload: 00"
 	}
 
-	tiles {
-		standardTile("water", "device.water", width: 2, height: 2) {
-			state "dry", icon:"st.alarm.water.dry", backgroundColor:"#ffffff"
-			state "wet", icon:"st.alarm.water.wet", backgroundColor:"#53a7c0"
+    tiles(scale: 2) {
+		multiAttributeTile(name:"water", type: "lighting", width: 6, height: 4){
+            tileAttribute ("device.water", key: "PRIMARY_CONTROL") {
+                attributeState "dry", label:'${name}', icon:"st.alarm.water.dry", backgroundColor:"#7bb630"
+                attributeState "wet", label:'${name}', icon:"st.alarm.water.wet", backgroundColor:"#1e9cbb"
+            }
+            tileAttribute("device.battery", key: "SECONDARY_CONTROL") {
+                attributeState("battery", label: 'Battery: ${currentValue}%')
+            }
+        }
+		standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat", width: 1, height: 1) {
+			state "default", action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
-		valueTile("battery", "device.battery", inactiveLabel: false, decoration: "flat") {
-			state "battery", label:'${currentValue}% battery', unit:""
-		}
-	
+
 		main "water"
-		details(["water", "battery"])
-	}
+		details(["water","refresh"])
+    }
 }
 
 def parse(String description) {
