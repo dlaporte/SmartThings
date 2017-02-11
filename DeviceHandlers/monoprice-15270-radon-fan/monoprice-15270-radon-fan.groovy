@@ -1,9 +1,52 @@
 /**
-* WADWAZ-1/Monoprice 15270 as Radon Fan Sensor
-*
-* Author: SmartThings
-* Date: 2016-05-22
-*/
+ *  WADWAZ-1/Monoprice 15270 as Radon Fan Sensor
+ *
+ *  Version - 0.1
+ *
+ *  Copyright 2017 David LaPorte
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ *  Instructions:
+ *
+ *      1) For US, visit: https://graph.api.smartthings.com
+ *      2) For UK, visit: https://graph-eu01-euwest1.api.smartthings.com
+ *      3) Click "My Device Handlers"
+ *      4) Click "New Device Handler" in the top right
+ *      5) Click the "From Code" tab
+ *      6) Paste in the code from: https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/monoprice-15270-radon-fan/monoprice-15270-radon-fan.groovy
+ *      7) Click "Create"
+ *      8) Click "Publish -> For Me"
+ * 
+ * Parts List:
+ *
+ *	1) Dwyer 1910-00 Pressure Switch
+ *	2) 1/8" barbed 3-way fitting
+ *	3) 1/8" Barb x 1/8" NPT Male Pipe fitting
+ *	4) 1/8" ID plastic tubing
+ *
+ * Install (non-destructively) on an existing RadonAway Easy Manometer:
+ *
+ *      1) Use dremel or other tool to cut away sensor case to expose terminals
+ *      2) Connect terminals on pressure switch to terminals on sensor
+ *      3) Install 1/8" Barb x 1/8" NPT fitting on pressure switch low pressure connection  
+ *      4) Test - attach tubing to adapter and gently inhale
+ *      5) Remove 1/8" manometer tubing from hole installed in vent pipe
+ *      6) Attach small segment of tubing to 3-way fitting
+ *      7) Attach manometer tubing to 3-way fitting
+ *      8) Connect tubing from adapter to 3-way fitting
+ *      9) Insert short tube into vent pipe hole
+ *      10) Test - shut off power to the fan to make sure there's not an updraft in the pipe that false positives
+ *      11) Setup a CoRE piston to alert you 
+ *      12) Sleep soundly knowing your house can no longer silently kill you if the fan dies!
+ */
 
 // for the UI
 metadata {
