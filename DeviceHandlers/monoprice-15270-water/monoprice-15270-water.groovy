@@ -8,7 +8,7 @@
 // for the UI
 metadata {
 
-	definition (name: "WADWAZ-1/Monoprice as Water Sensor", namespace: "dlaporte", author: "dlaporte") {
+	definition (name: "WADWAZ-1/Monoprice 15270 as Water Sensor", namespace: "dlaporte", author: "dlaporte") {
 		capability "Water Sensor"
 		capability "Sensor"
 		capability "Battery"
