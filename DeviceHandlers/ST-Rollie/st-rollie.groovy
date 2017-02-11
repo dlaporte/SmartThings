@@ -1,7 +1,7 @@
 /**
  *  Rollie Oil Gauge
  *
- *  Version - 0.1
+ *  Version - 0.2
  *
  *  Copyright 2017 David LaPorte
  *
@@ -277,3 +277,4 @@ def configure() {
         log.error "something went wrong: $e"
     }
 }
+
