@@ -21,18 +21,24 @@ metadata {
 		status "off": "command: 2001, payload: 00"
 	}
 
-	tiles {
-		standardTile("fanTile", "device.switch", width: 2, height: 2) {
-			state "on", icon:"st.thermostat.fan-on", backgroundColor:"#ffffff"
-			state "off", icon:"st.thermostat.fan-off", backgroundColor:"#ffffff"
-		}
-		valueTile("batteryTile", "device.battery", inactiveLabel: false, decoration: "flat") {
-			state "battery", label:'${currentValue}% battery', unit:""
-		}
-	
-		main "fanTile"
-		details(["fanTile", "batteryTile"])
-	}
+    tiles(scale: 2) {
+            multiAttributeTile(name:"fan", type: "lighting", width: 6, height: 4){
+                tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+                    attributeState "on", label:'', icon:"st.thermostat.fan-on", backgroundColor:"#7bb630"
+                    attributeState "off", label:'', icon:"st.thermostat.fan-off", backgroundColor:"#bc2323"
+                }
+                tileAttribute("device.battery", key: "SECONDARY_CONTROL") {
+                    attributeState("battery", label: 'Battery: ${currentValue}%')
+                }
+            }
+
+            standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat", width: 1, height: 1) {
+                state "default", action:"refresh.refresh", icon:"st.secondary.refresh"
+            }
+
+            main "fan"
+            details(["fan","refresh"])
+    }
 }
 
 def parse(String description) {
