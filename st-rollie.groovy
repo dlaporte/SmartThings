@@ -1,7 +1,7 @@
 /**
  *  Rollie Oil Gauge
  *
- *  Version - 0.2
+ *  Version - 0.1
  *
  *  Copyright 2017 David LaPorte
  *
@@ -123,8 +123,23 @@ metadata {
 	}
 }
 
+def updated() {
+	log.debug("updated with settings: ${settings.inspect()}")
+	pullAllControllers()
+}
+
+def refresh() {
+	log.debug "refresh called"
+	pullAllControllers()
+}
+
 def poll() {
-    log.debug "poll called"
+	log.debug "poll called"
+	pullAllControllers()
+}
+
+def pullAllControllers() {
+    log.debug "pullAllControllers called"
  
 	rollieLogin()
 
