@@ -34,7 +34,7 @@
  *
  * Install (non-destructively) on an existing RadonAway Easy Manometer:
  *
- *      1) Use dremel or other tool to cut away sensor case to expose terminals
+ *      1) Use a dremel or other tool to cut away sensor case to expose terminals
  *      2) Connect terminals on pressure switch to terminals on sensor
  *      3) Install 1/8" Barb x 1/8" NPT fitting on pressure switch low pressure connection  
  *      4) Test - attach tubing to adapter and gently inhale
@@ -65,6 +65,12 @@ metadata {
 	}
 
     tiles(scale: 2) {
+	multiAttributeTile(name:"fan_icon", type: "generic", width: 6, height: 4){
+		tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+			attributeState "on", label:'${name}', icon:"st.thermostat.fan-on", backgroundColor:"#7bb630"
+			attributeState "off", label:'${name}', icon:"st.thermostat.fan-off", backgroundColor:"#bc2323"
+		}
+	}
             multiAttributeTile(name:"fan", type: "lighting", width: 6, height: 4){
                 tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
                     attributeState "on", label:'', icon:"st.thermostat.fan-on", backgroundColor:"#7bb630"
@@ -79,7 +85,7 @@ metadata {
                 state "default", action:"refresh.refresh", icon:"st.secondary.refresh"
             }
 
-            main "fan"
+            main "fan_icon"
             details(["fan","refresh"])
     }
 }
