@@ -138,8 +138,6 @@ metadata {
 		valueTile("level_week_usage", "device.level_week_usage", width: 2, height: 2) {
 			state("level_week_usage", label: '${currentValue}')
 		}
-
-		//htmlTile(name:"graph", action: "getGraph", refreshInterval: 1, width: 6, height: 4, whitelist: ["www.gstatic.com"])
   
 		standardTile("refresh", "device.poll", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
 			state("default", action:"polling.poll", icon:"st.secondary.refresh")
@@ -156,14 +154,10 @@ metadata {
 		valueTile("level", "device.level", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
 			state "level", label: '${currentValue} inches'
 		}
-
+        
 		main "gallons_icon"
   		details(["summary", "today", "gallons_today_usage", "level_today_usage", "yesterday", "gallons_yesterday_usage", "level_yesterday_usage", "week", "gallons_week_usage", "level_week_usage", "updated", "refresh", "configure"])
 	}
-}
-
-mappings {
-	path("/getGraph") {action: [GET: "getGraph"]}
 }
 
 def updated() {
@@ -217,8 +211,18 @@ def parseAllControllers(response, data) {
 		def sn = table[0].children[1].children[0].children[15].children[0].text()
 		def date = table[0].children[1].children[0].children[15].children[1].text()
 		def time = table[0].children[1].children[0].children[15].children[2].text()
-		def level = table[0].children[1].children[0].children[15].children[3].text()
+		def level_fraction = table[0].children[1].children[0].children[15].children[3].text()
 		def gallons = table[0].children[1].children[0].children[15].children[4].text()
+
+
+		def whole = level_fraction.split('-')
+        def fraction = whole[1].split('/')
+        def level
+		if (fraction[0] == "0" && fraction[1] == "0") {
+        	level = new BigDecimal(whole[0])
+        } else {
+			level = new BigDecimal(whole[0]) + new BigDecimal(fraction[0]) / new BigDecimal(fraction[1])
+    	}
 
         sendEvent(name: 'level', value: "${level}", unit: "inches")
 		sendEvent(name: 'gallons', value: "${gallons}", unit: "gallons")
@@ -267,41 +271,45 @@ def parseHistory(response, data) {
 
 	def level_history = []
 	def gallons_history = []
-
+	def date_history = []
+    
     history[0].children[1].children.each {
+    	def date = new Date().parse('yyyy-MM-dd hh:mm:ss', it.children[4].text() + " " + it.children[5].text())
+    	date_history.add(date)
+        
         if (it.children[1].text()) {
-			level_history.add(Float.parseFloat(it.children[1].text()))
+			level_history.add(new BigDecimal(it.children[1].text()))
 		} else {
-        	level_history.add(0)
+        	level_history.add(new BigDecimal(0))
 		}
         if (it.children[2].text()) {
-			gallons_history.add(Float.parseFloat(it.children[2].text()))
+			gallons_history.add(new BigDecimal(it.children[2].text()))
 		} else {
-        	gallons_history.add(0)
+        	gallons_history.add(new BigDecimal(0))
 		}
     }
-	if (gallons_history.size >= 2) {
-	    def gallons_today_usage = gallons_history[-2] - gallons_history[-1]
-    	def level_today_usage = level_history[-2] - level_history[-1]
+	if (gallons_history.size >= 1 && gallons_today_usage > 0 && level_today_usage > 0) {
+	    def gallons_today_usage = gallons_history[-1] - device.currentValue("gallons")
+    	def level_today_usage = level_history[-1] - new BigDecimal(device.currentValue("level"))
 
-		sendEvent(name: 'level_today_usage', value: "${level_today_usage.round(1)}in ", unit: "inches")
-		sendEvent(name: 'gallons_today_usage', value: "${gallons_today_usage.round(1)}gal", unit: "gallons")
+		sendEvent(name: 'level_today_usage', value: "${level_today_usage}in", unit: "inches")
+		sendEvent(name: 'gallons_today_usage', value: "${gallons_today_usage}gal", unit: "gallons")
 	}
 
-	def gallons_yesterday_usage = gallons_history[-3] - gallons_history[-2]
-	def level_yesterday_usage = level_history[-3] - level_history[-2]
+	def gallons_yesterday_usage = gallons_history[-2] - gallons_history[-1]
+	def level_yesterday_usage = level_history[-2] - level_history[-1]
 
-	if (gallons_history.size >= 3 && gallons_yesterday_usage > 0) {
-		sendEvent(name: 'level_yesterday_usage', value: "${level_yesterday_usage.round(1)}in ", unit: "inches")
-		sendEvent(name: 'gallons_yesterday_usage', value: "${gallons_yesterday_usage.round(1)}gal", unit: "gallons")
+	if (gallons_history.size >= 2 && gallons_yesterday_usage > 0 && level_yesterday_usage > 0) {
+		sendEvent(name: 'level_yesterday_usage', value: "${level_yesterday_usage}in", unit: "inches")
+		sendEvent(name: 'gallons_yesterday_usage', value: "${gallons_yesterday_usage}gal", unit: "gallons")
 	}
 
-	def gallons_week_usage = gallons_history[-8] - gallons_history[-2]
-   	def level_week_usage = level_history[-8] - level_history[-2]
+	def gallons_week_usage = gallons_history[-8] - gallons_history[-1]
+   	def level_week_usage = level_history[-8] - level_history[-1]
 
-    if (gallons_history.size >= 9 && gallons_yesterday_usage > 0) {
-		sendEvent(name: 'level_week_usage', value: "${level_week_usage.round(1)}in ", unit: "inches")
-		sendEvent(name: 'gallons_week_usage', value: "${gallons_week_usage.round(1)}gal", unit: "gallons")
+    if (gallons_history.size >= 8 && gallons_week_usage > 0 && level_week_usage > 0) {
+		sendEvent(name: 'level_week_usage', value: "${level_week_usage}in", unit: "inches")
+		sendEvent(name: 'gallons_week_usage', value: "${gallons_week_usage}gal", unit: "gallons")
 	}
 }
 
@@ -395,87 +403,4 @@ def configure() {
     } catch (e) {
         log.error "something went wrong: $e"
     }
-}
-
-def getGraph() {
-	def html = """
-		<!DOCTYPE html>
-			<html>
-				<head>
-					<meta http-equiv="cache-control" content="max-age=0"/>
-					<meta http-equiv="cache-control" content="no-cache"/>
-					<meta http-equiv="expires" content="0"/>
-					<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT"/>
-					<meta http-equiv="pragma" content="no-cache"/>
-					<meta name="viewport" content="width = device-width">
-					<meta name="viewport" content="initial-scale = 1.0, user-scalable=no">
-					<style type="text/css">body,div {margin:0;padding:0}</style>
-					<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-					<script type="text/javascript">
-						google.charts.load('current', {packages: ['corechart']});
-						google.charts.setOnLoadCallback(drawGraph);
-						function drawGraph() {
-							var data = new google.visualization.DataTable();
-							data.addColumn('timeofday', 'time');
-							data.addColumn('number', 'Gallons (Yesterday)');
-							data.addColumn('number', 'Level (Yesterday)');
-                            
-                            
-                            
-                            
-							data.addColumn('number', 'Gallons (Today)');
-							data.addColumn('number', 'Level (Today)');
-							data.addRows([
-								${getDataString(1)}
-								${getDataString(2)}
-								${getDataString(3)}
-								${getDataString(4)}
-							]);
-							var options = {
-								fontName: 'San Francisco, Roboto, Arial',
-								height: 240,
-								hAxis: {
-									format: 'H:mm',
-									minValue: [${getStartTime()},0,0],
-									slantedText: false
-								},
-								series: {
-									0: {targetAxisIndex: 1, color: '#FFC2C2', lineWidth: 1},
-									1: {targetAxisIndex: 0, color: '#D1DFFF', lineWidth: 1},
-									2: {targetAxisIndex: 1, color: '#FF0000'},
-									3: {targetAxisIndex: 0, color: '#004CFF'}
-								},
-								vAxes: {
-									0: {
-										title: 'Power (W)',
-										format: 'decimal',
-										textStyle: {color: '#004CFF'},
-										titleTextStyle: {color: '#004CFF'}
-									},
-									1: {
-										title: 'Energy (kWh)',
-										format: 'decimal',
-										textStyle: {color: '#FF0000'},
-										titleTextStyle: {color: '#FF0000'}
-									}
-								},
-								legend: {
-									position: 'none'
-								},
-								chartArea: {
-									width: '72%',
-									height: '85%'
-								}
-							};
-							var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-							chart.draw(data, options);
-						}
-					</script>
-				</head>
-				<body>
-					<div id="chart_div"></div>
-				</body>
-			</html>
-		"""
-	render contentType: "text/html", data: html, status: 200
 }
