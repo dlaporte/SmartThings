@@ -262,7 +262,7 @@ def parseHistory(response, data) {
 	log.debug "Request was successful, ${response.status}"
 	
 	def xmlParser = new XmlSlurper()
-	def history = xmlParser.parseText(html2)
+	def history = xmlParser.parseText(response.getData())
 
 
 	def level_history = []
