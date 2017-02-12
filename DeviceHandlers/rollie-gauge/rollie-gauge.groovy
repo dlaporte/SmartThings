@@ -260,11 +260,7 @@ def pullHistory() {
 def parseHistory(response, data) {
 	log.debug "parseHistory called"
 	log.debug "Request was successful, ${response.status}"
-    
-    // fix missing </tbody> tag
-    String html = response.getData()
-	String html2 = html.replaceAll(/<\/tr><\/table>/, /<\/tr><\/tbody><\/table>/)
-
+	
 	def xmlParser = new XmlSlurper()
 	def history = xmlParser.parseText(html2)
 
