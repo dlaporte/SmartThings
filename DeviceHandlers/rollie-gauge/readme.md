@@ -8,16 +8,16 @@ This DTH directly accesses the Rollie portal to retrieve the latest data.  You w
 The device handler shows the latest data from the device (gallons/inches remaining) in the top tile as well as approximate usage data for current day, yesterday, and the past week.  These screenshots show the device in the Things view, the detailed device view, and the configuration screen.
 
 #### Things View
-<img width="300" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2558.png">
+<img width="250" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2558.png">
 
 #### Detailed Device View
-<img width="300" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2559.png">
-<img width="300" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2563.png">
+<img width="250" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2559.png">
+<img width="250" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2563.png">
 
 #### Setting View
-<img width="300" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2560.png">
-<img width="300" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2561.png">
-<img width="300" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2562.png">
+<img width="250" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2560.png">
+<img width="250" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2561.png">
+<img width="250" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2562.png">
 
 ### Installation
 Please see [this FAQ in the SmartThings Community](https://community.smartthings.com/t/faq-an-overview-of-using-custom-code-in-smartthings/16772) for instructions on how to install the device handler to your ST account.
