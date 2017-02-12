@@ -41,7 +41,7 @@ preferences {
 	input(name: "tanktype", type: "enum", options: ["0": "275 Vertical", "1": "275 Horizontal", "2": "330 Vertical", "3": "330 Horizonal", "4": "Roth 1000L", "5": "Roth 1500L", "6": "Roth 400L", "7": "Vertical Cylinder", "8": "Horizontal Cylinder", "9": "Square Tank"], defaultValue: "0", title: "Tank Type", displayDuringSetup: true)
 
 	input(title: "", description: "Vertical Cylinder Measurements (optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/ST-Rollie/master/vertical.png", element: "paragraph")
-    input(name: "v_height", type: "number", title: "Height", required: false)
+	input(name: "v_height", type: "number", title: "Height", required: false)
 	input(name: "v_diameter", type: "number", title: "Diameter", required: false)
 
 	input(title: "", description: "Horizontal Cylinder Measurements (optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/ST-Rollie/master/horizontal.png", element: "paragraph")
@@ -90,7 +90,7 @@ metadata {
 				attributeState("gallons", label: '${currentValue} gallons',
 					icon: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/oil-drop-icon-png-large.png",
 					unit: "gal",
-                    backgroundColors: [
+					backgroundColors: [
 						[value: 0, color: "#bc2323"],
 						[value: 50, color: "#1e9cbb"],
 						[value: 100, color: "#7bb630"]
@@ -100,15 +100,15 @@ metadata {
             
 			tileAttribute("device.level", key: "SECONDARY_CONTROL") {
 				attributeState("level", label: '${currentValue} inches')
-    		}
+	    		}
 		}
-
 
 		standardTile("today", "today", width: 2, height: 2) {
 			state("default", label: "Today")
 		}
+
 		valueTile("gallons_today_usage", "device.gallons_today_usage", width: 2, height: 2, decoration: "flat", wordWrap: false) {
-        	state("gallons_today_usage", label: '${currentValue}')
+	        	state("gallons_today_usage", label: '${currentValue}')
 		}
         
 		valueTile("level_today_usage", "device.level_today_usage", width: 2, height: 2) {
@@ -124,7 +124,7 @@ metadata {
 		}
         
 		valueTile("level_yesterday_usage", "device.level_yesterday_usage", width: 2, height: 2) {
-        	state("level_yesterday_usage", label: '${currentValue}')
+	        	state("level_yesterday_usage", label: '${currentValue}')
 		}
         
 		standardTile("week", "week", width: 2, height: 2) {
