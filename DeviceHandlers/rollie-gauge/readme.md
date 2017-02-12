@@ -5,7 +5,9 @@ This is a [SmartThings](http://smartthings.com) device handler for the [Rollie W
 This DTH directly accesses the Rollie portal to retrieve the latest data.  You will need your serial number (printed on the label on the gauge) and a password (defaults to "rollie") to configure the device.  While you can configure the gauge through the device handler properties, full control is still possible via the [Rollie portal] (http://rollieapp.com/gauges/).
 
 ### Device View in the SmartThings Mobile App
-The device handler shows the latest data from the device (gallons/inches remaining) in the top tile as well as approximate usage data for current day, yesterday, and the past week.  These screenshots show the device in the Things view, the detailed device view, and the configuration screen.
+The device handler shows the latest data from the device (gallons/inches remaining) in the top tile as well as approximate usage data for current day, yesterday, and the past week.  Previous days data will remain blank if there is not enough data or if the usage data doesn't make sense (eg. you received an oil delivery sometime that week).
+
+These screenshots show the device in the Things view, the detailed device view, and the configuration screen.
 
 #### Things View
 <img width="250" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2558.png">
