@@ -8,7 +8,7 @@ This DTH directly accesses the Rollie portal to retrieve the latest data.  You w
 The device handler shows the latest data from the device (gallons/inches remaining) in the top tile as well as approximate usage data for current day, yesterday, and the past week.  These screenshots show the device in the Things view, the detailed device view, and the configuration screen.
 
 #### Things View
-<img src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2558.png">
+<img width="200" src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2558.png">
 
 #### Detailed Device View
 <img src="https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/docs/IMG_2559.png">
