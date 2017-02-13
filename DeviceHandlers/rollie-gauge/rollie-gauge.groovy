@@ -88,7 +88,7 @@ metadata {
 		multiAttributeTile(name:"summary", type:"generic", width:6, height:4) {
 			tileAttribute("device.gallons", key: "PRIMARY_CONTROL") {
 				attributeState("gallons", label: '${currentValue} gallons',
-					icon: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/images/oil-drop-icon-png-large.pngg",
+					icon: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/images/oil-drop-icon-png-large.png",
 					unit: "gal",
 					backgroundColors: [
 						[value: 0, color: "#bc2323"],
