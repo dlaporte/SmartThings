@@ -40,15 +40,15 @@ preferences {
 	input(title: "", description: "Tank Configuration", type: "paragraph", element: "paragraph")
 	input(name: "tanktype", type: "enum", options: ["0": "275 Vertical", "1": "275 Horizontal", "2": "330 Vertical", "3": "330 Horizonal", "4": "Roth 1000L", "5": "Roth 1500L", "6": "Roth 400L", "7": "Vertical Cylinder", "8": "Horizontal Cylinder", "9": "Square Tank"], defaultValue: "0", title: "Tank Type", displayDuringSetup: true)
 
-	input(title: "", description: "Vertical Cylinder Measurements (optional) ", type: "paragraph image", image: "https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/images/vertical.png", element: "paragraph")
+	input(title: "", description: "Vertical Cylinder Measurements (optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/images/vertical.png", element: "paragraph")
 	input(name: "v_height", type: "number", title: "Height", required: false)
 	input(name: "v_diameter", type: "number", title: "Diameter", required: false)
 
-	input(title: "", description: "Horizontal Cylinder Measurements (optional) ", type: "paragraph image", image: "https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/images/horizontal.png", element: "paragraph")
+	input(title: "", description: "Horizontal Cylinder Measurements (optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/images/horizontal.png", element: "paragraph")
 	input(name: "h_length", type: "number", title: "Length", required: false)
 	input(name: "h_diameter", type: "number", title: "Diameter", required: false)
 
-	input(title: "", description: "Square Tank Measurements (optional) ", type: "paragraph image", image: "https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/images/square.png", element: "paragraph")
+	input(title: "", description: "Square Tank Measurements (optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/images/square.png", element: "paragraph")
 	input(name: "s_length", type: "number", title: "Length", required: false)
 	input(name: "s_width", type: "number", title: "Width", required: false)
 	input(name: "s_height", type: "number", title: "Height", required: false)
@@ -76,7 +76,7 @@ metadata {
 
 		valueTile("gallons_icon", "device.gallons") {
 			state("gallons", label: '${currentValue} gallons', unit: "gal",
-				icon: "https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/images/oil-icon.png",
+				icon: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/images/oil-icon.png",
 				backgroundColors: [
 					[value: 0, color: "#bc2323"],
 					[value: 50, color: "#1e9cbb"],
@@ -88,7 +88,7 @@ metadata {
 		multiAttributeTile(name:"summary", type:"generic", width:6, height:4) {
 			tileAttribute("device.gallons", key: "PRIMARY_CONTROL") {
 				attributeState("gallons", label: '${currentValue} gallons',
-					icon: "https://github.com/dlaporte/SmartThings/blob/master/DeviceHandlers/rollie-gauge/images/oil-drop-icon-png-large.png",
+					icon: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/images/oil-drop-icon-png-large.pngg",
 					unit: "gal",
 					backgroundColors: [
 						[value: 0, color: "#bc2323"],
