@@ -65,7 +65,7 @@ metadata {
         capability "Refresh"
 
         attribute "gallons", "number"
-        attribute "level", "string"
+        attribute "level", "number"
     }
 
     simulator {
@@ -284,10 +284,11 @@ def parseHistory(response, data) {
         	gallons_history.add(new BigDecimal(0))
 		}
     }
-	if (gallons_history.size >= 1 && gallons_today_usage > 0 && level_today_usage > 0) {
-	    def gallons_today_usage = gallons_history[-1] - device.currentValue("gallons")
-    	def level_today_usage = level_history[-1] - new BigDecimal(device.currentValue("level"))
 
+	def gallons_today_usage = gallons_history[-1] - device.currentValue("gallons")
+	def level_today_usage = level_history[-1] - device.currentValue("level")
+
+	if (gallons_history.size >= 1 && gallons_today_usage > 0 && level_today_usage > 0) {
 		sendEvent(name: 'level_today_usage', value: "${level_today_usage}in", unit: "inches")
 		sendEvent(name: 'gallons_today_usage', value: "${gallons_today_usage}gal", unit: "gallons")
 	}
