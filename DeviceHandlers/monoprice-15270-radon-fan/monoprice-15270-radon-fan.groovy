@@ -1,7 +1,8 @@
 /**
  *  WADWAZ-1/Monoprice 15270 as Radon Fan Sensor
  *
- *  Version - 0.1
+ *  Version - 0.1.1
+ *  0.1.1 - 15 Feb 1017 - corrected minor typo
  *
  *  Copyright 2017 David LaPorte
  *
