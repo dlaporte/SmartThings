@@ -1,7 +1,7 @@
 /**
  *  Rollie Oil Tank Gauge
  *
- *  Version - 0.2
+ *  Version - 0.3
  *
  *  Copyright 2017 David LaPorte
  *
@@ -63,7 +63,9 @@ metadata {
         capability "Polling"
         capability "Sensor"
         capability "Refresh"
-
+        // kludge for ActionTiles tile support, "humidity"="percent remaining"
+        capability "relativeHumidityMeasurement"
+    
         attribute "gallons", "number"
         attribute "level", "number"
     }
@@ -213,7 +215,8 @@ def parseAllControllers(response, data) {
 		def time = table[0].children[1].children[0].children[15].children[2].text()
 		def level_fraction = table[0].children[1].children[0].children[15].children[3].text()
 		def gallons = table[0].children[1].children[0].children[15].children[4].text()
-
+		
+        def percent = (int)((new BigDecimal(gallons) / new BigDecimal(275)) * new BigDecimal(100))
 
 		def whole = level_fraction.split('-')
         def fraction = whole[1].split('/')
@@ -230,6 +233,10 @@ def parseAllControllers(response, data) {
 		sendEvent(name: 'time', value: "${time}")
         sendEvent(name: 'sn', value: "${sn}", displayed: false)
 		sendEvent(name: 'updated', value: "${date}\n${time}", displayed: false)
+
+        // ActionTiles kludge display value - we'll display oil level as a percentage
+        // change "275" to your tank capacity for a correct value
+        sendEvent(name: 'humidity', value: "${percent}", unit: "%")
         
 	} else {
 		log.debug "parseAllControllers parse error"
