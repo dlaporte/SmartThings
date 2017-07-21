@@ -1,7 +1,7 @@
 /**
  *  Rollie Oil Tank Gauge
  *
- *  Version - 0.3
+ *  Version - 0.4
  *
  *  Copyright 2017 David LaPorte
  *
@@ -33,6 +33,7 @@ preferences {
 	input(title: "", description: "Account Configuration", type: "paragraph", element: "paragraph")
 	input(name: "serial", type: "text", title: "Gauge Serial Number", required: true, displayDuringSetup: true, capitalization: none)
 	input(name: "password", type: "text", title: "Password",  required: true, defaultValue: "rollie", displayDuringSetup: true, capitalization: none)
+    input(name: "pid", type: "text", title: "PID",  required: true, defaultValue: "0", displayDuringSetup: true, capitalization: none)
 	input(title: "", description: "Alerting Configuration", type: "paragraph", element: "paragraph")
 	input(name: "threshold", type: "number", title: "Low Oil Alert (gallons)", required: true, defaultValue: 15, capitalization: none)
 	input(name: "email", type: "email", title: "Alert Email", required: true, displayDuringSetup: true, capitalization: none)
@@ -62,10 +63,11 @@ metadata {
         capability "Configuration"
         capability "Polling"
         capability "Sensor"
+		capability "Actuator"
         capability "Refresh"
         // kludge for ActionTiles tile support, "humidity"="percent remaining"
         capability "relativeHumidityMeasurement"
-    
+
         attribute "gallons", "number"
         attribute "level", "number"
     }
@@ -99,7 +101,7 @@ metadata {
 					]
 				)
 			}
-            
+
 			tileAttribute("device.level", key: "SECONDARY_CONTROL") {
 				attributeState("level", label: '${currentValue} inches')
 	    		}
@@ -112,35 +114,35 @@ metadata {
 		valueTile("gallons_today_usage", "device.gallons_today_usage", width: 2, height: 2, decoration: "flat", wordWrap: false) {
 	        	state("gallons_today_usage", label: '${currentValue}')
 		}
-        
+
 		valueTile("level_today_usage", "device.level_today_usage", width: 2, height: 2) {
 			state("level_today_usage", label: '${currentValue}')
 		}
-        
+
 		standardTile("yesterday", "yesterday", width: 2, height: 2) {
 			state("default", label: "Yesterday")
 		}
-        
+
 		valueTile("gallons_yesterday_usage", "device.gallons_yesterday_usage", width: 2, height: 2, decoration: "flat", wordWrap: false) {
 			state("gallons_yesterday_usage", label: '${currentValue}')
 		}
-        
+
 		valueTile("level_yesterday_usage", "device.level_yesterday_usage", width: 2, height: 2) {
 	        	state("level_yesterday_usage", label: '${currentValue}')
 		}
-        
+
 		standardTile("week", "week", width: 2, height: 2) {
 			state("default", label: "Last Week")
 		}
-        
+
 		valueTile("gallons_week_usage", "device.gallons_week_usage", width: 2, height: 2, decoration: "flat", wordWrap: false) {
 			state("gallons_week_usage", label: '${currentValue}')
 		}
-        
+
 		valueTile("level_week_usage", "device.level_week_usage", width: 2, height: 2) {
 			state("level_week_usage", label: '${currentValue}')
 		}
-  
+
 		standardTile("refresh", "device.poll", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
 			state("default", action:"polling.poll", icon:"st.secondary.refresh")
 		}
@@ -152,11 +154,11 @@ metadata {
 		valueTile("updated", "device.updated", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
 		    state "updated", label: 'Updated:\n${currentValue}'
 		}
-        
+
 		valueTile("level", "device.level", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
 			state "level", label: '${currentValue} inches'
 		}
-        
+
 		main "gallons_icon"
   		details(["summary", "today", "gallons_today_usage", "level_today_usage", "yesterday", "gallons_yesterday_usage", "level_yesterday_usage", "week", "gallons_week_usage", "level_week_usage", "updated", "refresh", "configure"])
 	}
@@ -182,7 +184,7 @@ def poll() {
 
 def pullAllControllers() {
     log.debug "pullAllControllers called"
- 
+
 	rollieLogin()
 
 	def params = [
@@ -202,20 +204,22 @@ def pullAllControllers() {
 
 def parseAllControllers(response, data) {
 	log.debug "parseAllControllers called"
-	log.debug "Request was successful, ${response.status}"    
+	log.debug "Request was successful, ${response.status}"
 	def m
 	if ((m = response.getData() =~ /(?ms)<div class=\'container\'>(.+?)<\/div>/)) {
 		String div = m[0][1]
 
 		def xmlParser = new XmlSlurper()
 		def table = xmlParser.parseText(div)
-        
+
 		def sn = table[0].children[1].children[0].children[15].children[0].text()
 		def date = table[0].children[1].children[0].children[15].children[1].text()
 		def time = table[0].children[1].children[0].children[15].children[2].text()
 		def level_fraction = table[0].children[1].children[0].children[15].children[3].text()
 		def gallons = table[0].children[1].children[0].children[15].children[4].text()
-		
+
+        // ActionTiles kludge display value - we'll display oil level as a percentage
+        // change "275" to your tank capacity for a correct value
         def percent = (int)((new BigDecimal(gallons) / new BigDecimal(275)) * new BigDecimal(100))
 
 		def whole = level_fraction.split('-')
@@ -234,10 +238,8 @@ def parseAllControllers(response, data) {
         sendEvent(name: 'sn', value: "${sn}", displayed: false)
 		sendEvent(name: 'updated', value: "${date}\n${time}", displayed: false)
 
-        // ActionTiles kludge display value - we'll display oil level as a percentage
-        // change "275" to your tank capacity for a correct value
         sendEvent(name: 'humidity', value: "${percent}", unit: "%")
-        
+
 	} else {
 		log.debug "parseAllControllers parse error"
 	}
@@ -245,13 +247,13 @@ def parseAllControllers(response, data) {
 
 def pullHistory() {
     log.debug "pullHistory called"
- 
+
 	rollieLogin()
 
 	def params = [
 		uri: "http://rollieapp.com",
 		path: "/gauges/loadhistory.php",
-		query: ["sn": "${settings.serial}", "pid": "11"],
+		query: ["sn": "${settings.serial}", "pid": "${settings.pid}"],
 		headers: [
 			"Cookie": data.cookies
 		]
@@ -267,7 +269,7 @@ def pullHistory() {
 def parseHistory(response, data) {
 	log.debug "parseHistory called"
 	log.debug "Request was successful, ${response.status}"
-	
+
 	def xmlParser = new XmlSlurper()
 	def history = xmlParser.parseText(response.getData())
 
@@ -275,11 +277,12 @@ def parseHistory(response, data) {
 	def level_history = []
 	def gallons_history = []
 	def date_history = []
-    
-    history[0].children[1].children.each {
+
+	history[0].children[1].children.each {
+
     	def date = new Date().parse('yyyy-MM-dd hh:mm:ss', it.children[4].text() + " " + it.children[5].text())
     	date_history.add(date)
-        
+
         if (it.children[1].text()) {
 			level_history.add(new BigDecimal(it.children[1].text()))
 		} else {
@@ -308,10 +311,10 @@ def parseHistory(response, data) {
 		sendEvent(name: 'gallons_yesterday_usage', value: "${gallons_yesterday_usage}gal", unit: "gallons")
 	}
 
-	def gallons_week_usage = gallons_history[-8] - gallons_history[-1]
-   	def level_week_usage = level_history[-8] - level_history[-1]
-
     if (gallons_history.size >= 8 && gallons_week_usage > 0 && level_week_usage > 0) {
+    	def gallons_week_usage = gallons_history[-8] - gallons_history[-1]
+   		def level_week_usage = level_history[-8] - level_history[-1]
+    
 		sendEvent(name: 'level_week_usage', value: "${level_week_usage}in", unit: "inches")
 		sendEvent(name: 'gallons_week_usage', value: "${gallons_week_usage}gal", unit: "gallons")
 	}
@@ -347,7 +350,7 @@ def rollieLogin() {
           "Cookie": data.cookies
 		]
 	]
-    try {    
+    try {
         httpGet(params) { response ->
             log.debug "Request was successful, ${response.status}"
             def doc = response.data
@@ -383,7 +386,7 @@ def configure() {
 	if (!settings.s_height) {
     	settings.s_height = "n"
 	}
-    
+
     	def params = [
 		uri: "http://rollieapp.com",
 		path: "/gauges/updateclient.php",
@@ -392,7 +395,7 @@ def configure() {
 			"${settings.v_height}", "${settings.v_diameter}",
 			"${settings.h_diameter}", "${settings.h_length}",
 			"${settings.s_height}", "${settings.s_length}", "${settings.s_width}",
-			"${settings.tanktype}", "1", "${settings.email}", "${settings.sms}", "11"]
+			"${settings.tanktype}", "1", "${settings.email}", "${settings.sms}", "${settings.pid}"]
 		],
 		headers: [
 			"Cookie": data.cookies
