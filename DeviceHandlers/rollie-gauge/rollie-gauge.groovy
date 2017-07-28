@@ -1,7 +1,7 @@
 /**
  *  Rollie Oil Tank Gauge
  *
- *  Version - 0.4
+ *  Version - 0.5
  *
  *  Copyright 2017 David LaPorte
  *
@@ -33,30 +33,27 @@ preferences {
 	input(title: "", description: "Account Configuration", type: "paragraph", element: "paragraph")
 	input(name: "serial", type: "text", title: "Gauge Serial Number", required: true, displayDuringSetup: true, capitalization: none)
 	input(name: "password", type: "text", title: "Password",  required: true, defaultValue: "rollie", displayDuringSetup: true, capitalization: none)
-    input(name: "pid", type: "text", title: "PID",  required: true, defaultValue: "0", displayDuringSetup: true, capitalization: none)
+    input(name: "pid", type: "text", title: "PID",  description: "search for \"id='pid'\" in the RollApp HTML", required: true, defaultValue: "0", displayDuringSetup: true, capitalization: none)
 	input(title: "", description: "Alerting Configuration", type: "paragraph", element: "paragraph")
 	input(name: "threshold", type: "number", title: "Low Oil Alert (gallons)", required: true, defaultValue: 15, capitalization: none)
 	input(name: "email", type: "email", title: "Alert Email", required: true, displayDuringSetup: true, capitalization: none)
 	input(name: "sms", type: "phone", title: "Alert SMS Number (10 digits)", required: true, displayDuringSetup: true, capitalization: none)
 	input(title: "", description: "Tank Configuration", type: "paragraph", element: "paragraph")
 	input(name: "tanktype", type: "enum", options: ["0": "275 Vertical", "1": "275 Horizontal", "2": "330 Vertical", "3": "330 Horizonal", "4": "Roth 1000L", "5": "Roth 1500L", "6": "Roth 400L", "7": "Vertical Cylinder", "8": "Horizontal Cylinder", "9": "Square Tank"], defaultValue: "0", title: "Tank Type", displayDuringSetup: true)
-
-	input(title: "", description: "Vertical Cylinder Measurements (optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/images/vertical.png", element: "paragraph")
+    
+	input(title: "", description: "Vertical Cylinder Measurements (inches, optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/images/vertical.png", element: "paragraph")
 	input(name: "v_height", type: "number", title: "Height", required: false)
 	input(name: "v_diameter", type: "number", title: "Diameter", required: false)
 
-	input(title: "", description: "Horizontal Cylinder Measurements (optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/images/horizontal.png", element: "paragraph")
+	input(title: "", description: "Horizontal Cylinder Measurements (inches, optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/images/horizontal.png", element: "paragraph")
 	input(name: "h_length", type: "number", title: "Length", required: false)
 	input(name: "h_diameter", type: "number", title: "Diameter", required: false)
 
-	input(title: "", description: "Square Tank Measurements (optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/images/square.png", element: "paragraph")
+	input(title: "", description: "Square Tank Measurements (inches, optional) ", type: "paragraph image", image: "https://raw.githubusercontent.com/dlaporte/SmartThings/master/DeviceHandlers/rollie-gauge/images/square.png", element: "paragraph")
 	input(name: "s_length", type: "number", title: "Length", required: false)
 	input(name: "s_width", type: "number", title: "Width", required: false)
 	input(name: "s_height", type: "number", title: "Height", required: false)
-
-
 }
-
 
 metadata {
     definition (name: "Rollie Oil Tank Gauge", namespace: "dlaporte", author: "David LaPorte") {
@@ -218,9 +215,7 @@ def parseAllControllers(response, data) {
 		def level_fraction = table[0].children[1].children[0].children[15].children[3].text()
 		def gallons = table[0].children[1].children[0].children[15].children[4].text()
 
-        // ActionTiles kludge display value - we'll display oil level as a percentage
-        // change "275" to your tank capacity for a correct value
-        def percent = (int)((new BigDecimal(gallons) / new BigDecimal(275)) * new BigDecimal(100))
+        def percent = (int)((new BigDecimal(gallons) / new BigDecimal(state.tank_capacity)) * new BigDecimal(100))
 
 		def whole = level_fraction.split('-')
         def fraction = whole[1].split('/')
@@ -278,21 +273,20 @@ def parseHistory(response, data) {
 	def gallons_history = []
 	def date_history = []
 
-	history[0].children[1].children.each {
-
-    	def date = new Date().parse('yyyy-MM-dd hh:mm:ss', it.children[4].text() + " " + it.children[5].text())
-    	date_history.add(date)
+    history[0].children[1].children.each {
+        def date = new Date().parse('yyyy-MM-dd hh:mm:ss', it.children[4].text() + " " + it.children[5].text())
+        date_history.add(date)
 
         if (it.children[1].text()) {
-			level_history.add(new BigDecimal(it.children[1].text()))
-		} else {
-        	level_history.add(new BigDecimal(0))
-		}
+            level_history.add(new BigDecimal(it.children[1].text()))
+        } else {
+            level_history.add(new BigDecimal(0))
+        }
         if (it.children[2].text()) {
-			gallons_history.add(new BigDecimal(it.children[2].text()))
-		} else {
-        	gallons_history.add(new BigDecimal(0))
-		}
+            gallons_history.add(new BigDecimal(it.children[2].text()))
+        } else {
+            gallons_history.add(new BigDecimal(0))
+        }
     }
 
 	def gallons_today_usage = gallons_history[-1] - device.currentValue("gallons")
@@ -364,7 +358,37 @@ def rollieLogin() {
 def configure() {
 	log.debug "configure called"
     rollieLogin()
+    
+	def cylinder_capacity
+    try {
+		cylinder_capacity = v_height * (v_diameter/2) * (v_diameter/2) * 3.14 * 0.004329
+    } catch (e) {
+		cylinder_capacity = 0
+    }
+    
+	def square_capacity
+    try {
+		square_capacity = s_length * s_width * s_height * 0.004329
+    } catch (e) {
+		square_capacity = 0
+    }
 
+	// capacity of tank (in gallons)
+	def tank_capacities = [275,
+    					   275,
+                           330,
+                           330,
+                           1000,
+                           1500,
+                           400,
+                           cylinder_capacity,
+                           cylinder_capacity,
+                           square_capacity,
+                           square_capacity
+                          ]
+                          
+	state.tank_capacity = tank_capacities[settings.tanktype.toInteger()]
+    
     if (!settings.v_height) {
     	settings.v_height = "n"
 	}
@@ -386,8 +410,8 @@ def configure() {
 	if (!settings.s_height) {
     	settings.s_height = "n"
 	}
-
-    	def params = [
+    
+	def params = [
 		uri: "http://rollieapp.com",
 		path: "/gauges/updateclient.php",
 		query: ["userdata[]": [
