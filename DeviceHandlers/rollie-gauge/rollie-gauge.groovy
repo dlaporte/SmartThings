@@ -1,7 +1,7 @@
 /**
  *  Rollie Oil Tank Gauge
  *
- *  Version - 0.5
+ *  Version - 0.6
  *
  *  Copyright 2017 David LaPorte
  *
@@ -209,21 +209,22 @@ def parseAllControllers(response, data) {
 		def xmlParser = new XmlSlurper()
 		def table = xmlParser.parseText(div)
 
-		def sn = table[0].children[1].children[0].children[15].children[0].text()
-		def date = table[0].children[1].children[0].children[15].children[1].text()
-		def time = table[0].children[1].children[0].children[15].children[2].text()
-		def level_fraction = table[0].children[1].children[0].children[15].children[3].text()
-		def gallons = table[0].children[1].children[0].children[15].children[4].text()
+		def sn = table[0].children[1].children[0].children[15].children[0].text().trim()
+		def date = table[0].children[1].children[0].children[15].children[1].text().trim()
+		def time = table[0].children[1].children[0].children[15].children[2].text().trim()
+		def level_fraction = table[0].children[1].children[0].children[15].children[3].text().trim()
+		def gallons = table[0].children[1].children[0].children[15].children[4].text().trim()
 
         def percent = (int)((new BigDecimal(gallons) / new BigDecimal(state.tank_capacity)) * new BigDecimal(100))
-
+    
 		def whole = level_fraction.split('-')
         def fraction = whole[1].split('/')
-        def level
+		def level
+
 		if (fraction[0] == "0" && fraction[1] == "0") {
         	level = new BigDecimal(whole[0])
         } else {
-			level = new BigDecimal(whole[0]) + new BigDecimal(fraction[0]) / new BigDecimal(fraction[1])
+			level = new BigDecimal(whole[0]) + (new BigDecimal(fraction[0]) / new BigDecimal(fraction[1]))
     	}
 
         sendEvent(name: 'level', value: "${level}", unit: "inches")
