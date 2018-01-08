@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # rpi-dht.py
-# sends DHT temperature/humidity data to rpi-dht SmartThings REST endpoint
+# sends DHT11/22 temperature/humidity values to rpi-dht SmartThings REST endpoint
 # needs to run via cron or another scheduler:
 # */5 * * * * /root/bin/rpi-dht.py
 
