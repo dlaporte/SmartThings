@@ -15,10 +15,10 @@
  *
  */
 definition(
-    name: "RPI Temperature/Humidity Sensor",
+    name: "RPi DHT11/22 Temperature/Humidity Sensor",
     namespace: "dlaporte",
     author: "David LaPorte",
-    description: "REST endpoint for Pi to update a Simulated Temperature Sensor",
+    description: "REST endpoint for RPi temperature/humidity script",
     category: "Convenience",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
