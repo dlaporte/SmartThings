@@ -23,7 +23,6 @@ metadata {
 
     }
  
-    // UI tile definition
     tiles(scale:2) {
         valueTile("temperature", "device.temperature", height: 4, width: 6, canChangeIcon: true) {
             state("temperature", label:'${currentValue}°', unit:"F",
@@ -63,7 +62,6 @@ metadata {
     }
 }
  
-// Parse incoming device messages to generate events
 def parse(String description) {
     def pair = description.split(":")
     createEvent(name: pair[0].trim(), value: pair[1].trim())
