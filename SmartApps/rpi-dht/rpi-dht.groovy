@@ -1,7 +1,8 @@
 /**
- *  Pi Temperature Sensor Endpoints
+ *  RPI Temperature/Humidity Sensor
  *
- *  Copyright 2016 Paul Cifarelli
+ *  Copyright 2016 David LaPorte
+ *  based on code originally written by Paul Cifarelli
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,15 +15,15 @@
  *
  */
 definition(
-    name: "Pi Temperature Sensor",
-    namespace: "pcifarelli",
-    author: "Paul Cifarelli",
+    name: "RPI Temperature/Humidity Sensor",
+    namespace: "dlaporte",
+    author: "David LaPorte",
     description: "REST endpoint for Pi to update a Simulated Temperature Sensor",
     category: "Convenience",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
     iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-    oauth: [displayName: "Cifarelli.net", displayLink: ""])
+    oauth: [displayName: "davidlaporte.org", displayLink: ""])
  
 preferences {
     section("Allow Endpoint to Control This Thing") {
