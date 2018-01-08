@@ -57,12 +57,7 @@ def updated() {
     unsubscribe()
     initialize()
 }
- 
-def initialize() {
-    // TODO: subscribe to attributes, devices, locations, etc.
-}
- 
-// implement event handlers
+
 void updateTemperature() {
     updateT(tdevice)
 }
@@ -70,7 +65,6 @@ void updateTemperature() {
 void updateHumidity() {
     updateH(tdevice)
 }
-
 
 private void updateT(device) {
      log.debug "update temperature, request: params: ${params['temperature']} ${params['units']} ${device.name}"
