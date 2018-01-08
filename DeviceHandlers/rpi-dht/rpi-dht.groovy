@@ -13,7 +13,7 @@
  *
  */
 metadata {
-    definition (name: "RPI Temperature/Humidity Sensor", namespace: "dlaporte", author: "David LaPorte") {
+    definition (name: "RPi DHT11/22 Temperature/Humidity Sensor", namespace: "dlaporte", author: "David LaPorte") {
         capability "Temperature Measurement"
 		capability "Relative Humidity Measurement"
         capability "Sensor"
